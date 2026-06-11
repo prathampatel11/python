@@ -1,0 +1,199 @@
+ 1. Insert a new actor
+
+INSERT INTO actor (first_name, last_name) VALUES ('Rajesh', 'Patel');
+
+## 2. Insert three new categories
+
+INSERT INTO category (name) VALUES ('Sci-Fi Thriller'), ('Comedy Drama'), ('Action Adventure');
+
+## 3. Insert a new film
+
+INSERT INTO film (title, description, release_year, language_id, rental_rate, replacement_cost) VALUES ('Gujarat Warriors', 'A story of courage in Bhavnagar', 2025, 1, 5.99, 25.99);
+
+## 4. Insert a new customer
+
+INSERT INTO customer (first_name, last_name, store_id, address_id, active) VALUES ('Priya', 'Sharma', 1, 5, 1);
+
+## 5. Add yourself as a new staff member
+
+INSERT INTO staff (first_name, last_name, address_id, email, store_id, active, username, password) VALUES ('Student', 'One', 5, 'student01@sakila.com', 1, 1, 'student01', 'pass123');
+
+## 6. Update the last_name of actor_id 200
+
+UPDATE actor SET last_name = 'Kapoor' WHERE actor_id = 200;
+
+## 7. Update the rental_rate of all films in category 'Action'
+
+UPDATE film, film_category, category SET film.rental_rate = 3.99 WHERE film.film_id = film_category.film_id 
+  AND film_category.category_id = category.category_id 
+  AND category.name = 'Action';
+
+## 8. Increase the replacement_cost of all films longer than 120 minutes by 10%
+
+UPDATE film SET replacement_cost = replacement_cost * 1.10 WHERE length > 120;
+
+## 9. Update the email of customer with customer_id=5
+
+UPDATE customer SET email = 'newemail@example.com' WHERE customer_id = 5;
+
+## 10. Set all inactive customers to active
+
+UPDATE customer SET active = 1 WHERE active = 0;
+
+## 11. Delete the actor inserted in exercise 1
+
+DELETE FROM actor WHERE first_name = 'Rajesh' AND last_name = 'Patel';
+
+## 12. Delete all films that have no inventory
+
+DELETE FROM film WHERE film_id NOT IN (SELECT DISTINCT film_id FROM inventory);
+
+## 13. Remove all payments made before '2005-01-01'
+
+DELETE FROM payment WHERE payment_date < '2005-01-01';
+
+## 14. Delete the category 'Sci-Fi Thriller'
+
+DELETE FROM category WHERE name = 'Sci-Fi Thriller';
+
+## 15. Truncate film_text and re-insert data
+
+TRUNCATE TABLE film_text;UPDATE film SET title = title;
+
+------------------------------
+## Section 2: Basic SELECT & Filtering## 16. List all actors sorted by last_name ascending
+
+SELECT * FROM actor ORDER BY last_name ASC;
+
+## 17. Show all films released in 2006 with rental_rate > 4.00
+
+SELECT * FROM film WHERE release_year = 2006 AND rental_rate > 4.00;
+
+## 18. Find customers whose last_name starts with 'S'
+
+SELECT * FROM customer WHERE last_name LIKE 'S%';
+
+## 19. Display the top 10 most expensive films
+
+SELECT * FROM film ORDER BY replacement_cost DESC LIMIT 10;
+
+## 20. Show all stores and their manager staff names (No JOIN)
+
+SELECT store.store_id, staff.first_name, staff.last_name FROM store, staff WHERE store.manager_staff_id = staff.staff_id;
+
+## 21. List all languages available
+
+SELECT name FROM language;
+
+## 22. Find films that have 'love' in their description
+
+SELECT * FROM film WHERE description LIKE '%love%';
+
+## 23. Display customers who are not active
+
+SELECT * FROM customer WHERE active = 0;
+
+## 24. Show rental records where return_date is NULL
+
+SELECT * FROM rental WHERE return_date IS NULL;
+
+## 25. List all cities in India or any country starting with 'I' (No JOIN)
+
+SELECT city.city FROM city, country WHERE city.country_id = country.country_id 
+  AND country.country LIKE 'I%';
+
+------------------------------
+## Section 3: JOINs (Rewritten using WHERE syntax)## 26. Show film titles along with their category names
+
+SELECT film.title, category.name FROM film, film_category, category WHERE film.film_id = film_category.film_id 
+  AND film_category.category_id = category.category_id;
+
+## 27. List all customers with their full address, city, and country
+
+SELECT customer.first_name, customer.last_name, address.address, city.city, country.country FROM customer, address, city, country WHERE customer.address_id = address.address_id 
+  AND address.city_id = city.city_id 
+  AND city.country_id = country.country_id;
+
+## 28. Display actors and the number of films they have acted in
+
+SELECT actor.actor_id, actor.first_name, actor.last_name, COUNT(film_actor.film_id) AS total_films FROM actor, film_actor WHERE actor.actor_id = film_actor.actor_id GROUP BY actor.actor_id, actor.first_name, actor.last_name;
+
+## 29. Show rentals with customer name, film title, and rental date
+
+SELECT customer.first_name, customer.last_name, film.title, rental.rental_date FROM rental, customer, inventory, film WHERE rental.customer_id = customer.customer_id 
+  AND rental.inventory_id = inventory.inventory_id 
+  AND inventory.film_id = film.film_id;
+
+## 30. Find staff members and the store they manage
+
+SELECT staff.first_name, staff.last_name, store.store_id FROM staff, store WHERE staff.staff_id = store.manager_staff_id;
+
+## 31. List films with their actors
+
+SELECT film.title, actor.first_name, actor.last_name FROM film, film_actor, actor WHERE film.film_id = film_actor.film_id 
+  AND film_actor.actor_id = actor.actor_id;
+
+## 32. Show payment amount, customer name, and staff name
+
+SELECT payment.amount, customer.first_name AS cust_first, customer.last_name AS cust_last, staff.first_name AS staff_first, staff.last_name AS staff_last FROM payment, customer, staff WHERE payment.customer_id = customer.customer_id 
+  AND payment.staff_id = staff.staff_id;
+
+## 33. Display inventory items with film title and store address
+
+SELECT inventory.inventory_id, film.title, address.address FROM inventory, film, store, address WHERE inventory.film_id = film.film_id 
+  AND inventory.store_id = store.store_id 
+  AND store.address_id = address.address_id;
+
+## 34. Find which categories have the most films
+
+SELECT category.name, COUNT(film_category.film_id) AS film_count FROM category, film_category WHERE category.category_id = film_category.category_id GROUP BY category.name ORDER BY film_count DESC;
+
+## 35. Show top 5 customers by total payment amount
+
+SELECT customer.customer_id, customer.first_name, customer.last_name, SUM(payment.amount) AS total_spent FROM customer, payment WHERE customer.customer_id = payment.customer_id GROUP BY customer.customer_id, customer.first_name, customer.last_name ORDER BY total_spent DESC LIMIT 5;
+
+------------------------------
+## Section 4: Aggregate Functions, GROUP BY, HAVING## 36. Count total number of films in the database
+
+SELECT COUNT(*) AS total_films FROM film;
+
+## 37. Find the average rental_rate of all films
+
+SELECT AVG(rental_rate) AS average_rental_rate FROM film;
+
+## 38. Show the number of films per category, sorted descending
+
+SELECT category.name, COUNT(film_category.film_id) AS total_films FROM category, film_category WHERE category.category_id = film_category.category_id GROUP BY category.name ORDER BY total_films DESC;
+
+## 39. Find the total payment collected by each staff member
+
+SELECT staff_id, SUM(amount) AS total_collected FROM payment GROUP BY staff_id;
+
+## 40. Show customers who have made more than 10 rentals
+
+SELECT customer_id, COUNT(*) AS rental_count FROM rental GROUP BY customer_id HAVING rental_count > 10;
+
+## 41. Find categories where average film length is greater than 120 minutes
+
+SELECT category.name, AVG(film.length) AS avg_length FROM category, film_category, film WHERE category.category_id = film_category.category_id 
+  AND film_category.film_id = film.film_id GROUP BY category.name HAVING avg_length > 120;
+
+## 42. Calculate total revenue per month from payments
+
+SELECT DATE_FORMAT(payment_date, '%Y-%m') AS payment_month, SUM(amount) AS monthly_revenue FROM payment GROUP BY payment_month;
+
+## 43. Find actors who have appeared in more than 20 films
+
+SELECT actor_id, COUNT(*) AS film_count FROM film_actor GROUP BY actor_id HAVING film_count > 20;
+
+## 44. Show stores with the highest number of rentals
+
+SELECT store_id, COUNT(rental.rental_id) AS total_rentals FROM inventory, rental WHERE inventory.inventory_id = rental.inventory_id GROUP BY store_id ORDER BY total_rentals DESC;
+
+## 45. Find the most rented film
+
+SELECT film.title, COUNT(rental.rental_id) AS times_rented FROM film, inventory, rental WHERE film.film_id = inventory.film_id 
+  AND inventory.inventory_id = rental.inventory_id GROUP BY film.title ORDER BY times_rented DESC LIMIT 1;
+
+Would you like help creating advanced subqueries, setting up views, or optimizing any of these syntax structures for performance?
+
